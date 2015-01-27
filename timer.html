@@ -232,7 +232,7 @@
             time++;
             $("#time").html(formatTime(time));
             $("#cost").html(formatCost(time * attenders * rate / 3600));
-            document.location.hash = "#" + rate + "-" + attenders + "-" + time;
+            window.history.replaceState({}, 'Timer', "#" + rate + "-" + attenders + "-" + time);
         }, 1000);
     }
 
