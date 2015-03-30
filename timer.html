@@ -205,6 +205,8 @@
                 <p class="lead">
                     <span id="cost">&nbsp;</span>
                 </p>
+                <button id="clock-button" onclick="javascript: pause_play_clock()" class="btn btn-lg btn-default">pause</button>
+                <button id="restart-button" onclick="javascript: start_over()" class="btn btn-lg btn-default">start over</button>
             </div>
         </div>
     </div>
@@ -216,29 +218,53 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script>
     var interval = null;
+    var clockStatus = 1;
+    var attendees = null;
+    var rate = null;
+    var clockTime = 0;
 
     function init() {
         $("#form").fadeOut('slow', function() {
             $("#timer").show();
         });
 
-        var attenders = $("#attenders").val();
-        var rate      = $("#rate").val();
+        attendees = $("#attenders").val();
+        rate      = $("#rate").val();
 
-        start(rate, attenders, 0);
+        start(rate, attendees);
     }
 
-    function start(rate, attenders, time) {
+    function start(rate, attendees) {
         if (interval) {
             clearInterval(interval);
         }
 
         interval = setInterval(function() {
-            time++;
-            $("#time").html(formatTime(time));
-            $("#cost").html(formatCost(time * attenders * rate / 3600));
-            window.history.replaceState({}, 'Timer', "#" + rate + "-" + attenders + "-" + time);
+            clockTime++;
+            $("#time").html(formatTime(clockTime));
+            $("#cost").html(formatCost(clockTime * attendees * rate / 3600));
+            window.history.replaceState({}, 'Timer', "#" + rate + "-" + attendees + "-" + clockTime);
         }, 1000);
+    }
+
+    function pause(){
+        if (interval) {
+            clearInterval(interval);
+        }
+    }
+
+    function start_over() {
+        pause();
+        clockTime = 0;
+
+        $("#timer").fadeOut('slow', function() {
+            $("#form").show();
+        });
+
+        $("#time").html(formatTime(clockTime));
+        $("#cost").html(formatCost(clockTime * attendees * rate / 3600));
+        $("#attenders").val(attendees);
+        $("#rate").val(rate);
     }
 
     function formatTime(time) {
@@ -263,6 +289,23 @@
         var amount = cost.toFixed(2);
 
         return amount + " &euro;";
+    }
+
+    function pause_play_clock() {
+
+        if (clockStatus == 1)
+        {
+            clockStatus = 0;
+            $("#clock-button").html("resume");
+            pause();
+            
+        }
+        else
+        {
+            clockStatus = 1;
+            $("#clock-button").html("pause");
+            start(rate, attendees);           
+        }    
     }
 
     $(function() {
