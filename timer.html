@@ -189,7 +189,7 @@
                     <input class="form-control" autofocus="true" name="rate" id="rate" placeholder="Average hour rate per person">
                 </div>
                 <div class="form-group">
-                    <input class="form-control" name="rate" id="attenders" placeholder="Number of attendees">
+                    <input class="form-control" name="rate" id="attendees" placeholder="Number of attendees">
                 </div>
                 <p class="lead">
                     <a href="javascript: init()" class="btn btn-lg btn-default">Start</a>
@@ -205,8 +205,14 @@
                 <p class="lead">
                     <span id="cost">&nbsp;</span>
                 </p>
-                <button id="clock-button" onclick="javascript: pause_play_clock()" class="btn btn-lg btn-default">pause</button>
-                <button id="restart-button" onclick="javascript: start_over()" class="btn btn-lg btn-default">start over</button>
+                <button id="clock-button" onclick="javascript: pauseResumeClock()" class="btn btn-lg btn-default">pause</button>
+                <button id="restart-button" onclick="javascript: startOver()" class="btn btn-lg btn-default">start over</button>
+                <h1 class="cover-heading">Attendees</h1>
+                <p class="lead">
+                    <button id="decrease-pax" onclick="javascript: decreasePax()" class="btn btn-lg btn-default">-</button>
+                    <span id="current-attendees">&nbsp;</span>
+                    <button id="increase-pax" onclick="javascript: increasePax()" class="btn btn-lg btn-default">+</button>
+                </p>
             </div>
         </div>
     </div>
@@ -222,19 +228,21 @@
     var attendees = null;
     var rate = null;
     var clockTime = 0;
+    var total = 0;
 
     function init() {
         $("#form").fadeOut('slow', function() {
             $("#timer").show();
         });
 
-        attendees = $("#attenders").val();
+        attendees = $("#attendees").val();
         rate      = $("#rate").val();
 
-        start(rate, attendees);
+        refreshPax();
+        start(rate);
     }
 
-    function start(rate, attendees) {
+    function start(rate) {
         if (interval) {
             clearInterval(interval);
         }
@@ -242,7 +250,9 @@
         interval = setInterval(function() {
             clockTime++;
             $("#time").html(formatTime(clockTime));
-            $("#cost").html(formatCost(clockTime * attendees * rate / 3600));
+            total += attendees * rate / 3600;
+            $("#cost").html(formatCost(total));
+            //$("#cost").html(formatCost(clockTime * attendees * rate / 3600));
             window.history.replaceState({}, 'Timer', "#" + rate + "-" + attendees + "-" + clockTime);
         }, 1000);
     }
@@ -253,9 +263,10 @@
         }
     }
 
-    function start_over() {
+    function startOver() {
         pause();
         clockTime = 0;
+        total = 0;
 
         $("#timer").fadeOut('slow', function() {
             $("#form").show();
@@ -263,7 +274,7 @@
 
         $("#time").html(formatTime(clockTime));
         $("#cost").html(formatCost(clockTime * attendees * rate / 3600));
-        $("#attenders").val(attendees);
+        $("#attendees").val(attendees);
         $("#rate").val(rate);
     }
 
@@ -291,7 +302,7 @@
         return amount + " &euro;";
     }
 
-    function pause_play_clock() {
+    function pauseResumeClock() {
 
         if (clockStatus == 1)
         {
@@ -304,8 +315,30 @@
         {
             clockStatus = 1;
             $("#clock-button").html("pause");
-            start(rate, attendees);           
+            start(rate);           
         }    
+    }
+    
+    function increasePax() {
+        attendees++;
+        refreshPax();
+        start(rate);  
+    }
+
+    function decreasePax() {
+        attendees--;
+        refreshPax();
+        start(rate); 
+
+    }
+
+    function refreshPax() {
+        $("#current-attendees").html(attendees);
+        if (attendees > 1) {
+            $("#decrease-pax").removeAttr("disabled");
+        }
+        else
+            $("#decrease-pax").attr("disabled", "disabled");
     }
 
     $(function() {
