@@ -28,6 +28,17 @@
             text-shadow: none; /* Prevent inheritence from `body` */
             background-color: #fff;
             border: 1px solid #fff;
+            width: 120px;
+            margin: 0 15px;
+        }
+
+        .btn-num-pax{
+              width: 25px;
+              height: 25px;
+              line-height: 0px;
+              border-radius: 12px;
+              color: white;
+              font-size: 16px;
         }
 
         html,
@@ -131,6 +142,10 @@
             text-shadow: 2px 2px 0 rgba(0,0,0,0.25);
         }
 
+        #current-attendees{
+            color:whitesmoke;
+        }
+
         .mastfoot {
             color: #999; /* IE8 proofing */
             color: rgba(255,255,255,.5);
@@ -192,11 +207,18 @@
                     <input class="form-control" name="rate" id="attendees" placeholder="Number of attendees">
                 </div>
                 <p class="lead">
-                    <a href="javascript: init()" class="btn btn-lg btn-default">Start</a>
+                    <a id="start-button" href="javascript: init()" class="btn btn-lg btn-default">Start</a>
                 </p>
             </div>
             <div class="inner cover" id="timer">
-                <h1 class="cover-heading">This meeting is taking</h1>
+                <h1 class="cover-heading">
+                there are
+                    <button class="btn-num-pax" id="decrease-pax" onclick="javascript: decreasePax()">-</button>
+                    <span id="current-attendees">&nbsp;</span>
+                    <button class="btn-num-pax" id="increase-pax" onclick="javascript: increasePax()">+</button>
+                attendees in this meeting and is taking
+                </h1>
+
                 <p class="lead">
                     <span id="time">&nbsp;</span>
                 </p>
@@ -205,14 +227,8 @@
                 <p class="lead">
                     <span id="cost">&nbsp;</span>
                 </p>
-                <button id="clock-button" onclick="javascript: pauseResumeClock()" class="btn btn-lg btn-default">pause</button>
-                <button id="restart-button" onclick="javascript: startOver()" class="btn btn-lg btn-default">start over</button>
-                <h1 class="cover-heading">Attendees</h1>
-                <p class="lead">
-                    <button id="decrease-pax" onclick="javascript: decreasePax()" class="btn btn-lg btn-default">-</button>
-                    <span id="current-attendees">&nbsp;</span>
-                    <button id="increase-pax" onclick="javascript: increasePax()" class="btn btn-lg btn-default">+</button>
-                </p>
+                <a id="clock-button" onclick="javascript: pauseResumeClock()" class="btn btn-lg btn-default">pause</a>
+                <a id="restart-button" onclick="javascript: startOver()" class="btn btn-lg btn-default">start over</a>                
             </div>
         </div>
     </div>
@@ -225,8 +241,8 @@
 <script>
     var interval = null;
     var isClockTicking = 0;
-    var attendees = null;
-    var rate = null;
+    var attendees = 0;
+    var rate = 0;
     var clockTime = 0;
     var total = 0;
 
@@ -267,8 +283,8 @@
         refreshPauseResumeButton();
     }
 
-    function startOver() {
-        pause();
+    function startOver() { 
+        pause();       
         clockTime = 0;
         total = 0;        
 
@@ -279,7 +295,7 @@
         $("#time").html(formatTime(clockTime));
         $("#cost").html(formatCost(clockTime * attendees * rate / 3600));
         $("#attendees").val(attendees);
-        $("#rate").val(rate);
+        $("#rate").val(rate);  
     }
 
     function formatTime(time) {
@@ -343,10 +359,19 @@
         if (document.location.hash.match(/^#\d+-\d+-\d+$/)) {
             var parts = document.location.hash.substr(1).split('-');
             $("#timer").show();
-            start(parts[0], parts[1], parts[2]);
+            rate = parts[0];
+            attendees = parts[1];
+            clockTime = parts[2];
+            start();
+            refreshPax();
         } else {
             $("#form").show();
         }
+        $(".form-control").keydown(function (e){
+            if(e.keyCode == 13){
+                init();
+            }
+        });
     });
 </script>
 </body>
