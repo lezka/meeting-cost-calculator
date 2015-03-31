@@ -353,6 +353,7 @@
         }
         else
             $("#decrease-pax").attr("disabled", "disabled");
+        $(".btn-num-pax").blur();
     }
 
     $(function() {
@@ -370,6 +371,11 @@
         $(".form-control").keydown(function (e){
             if(e.keyCode == 13){
                 init();
+            }
+        });
+        $(document).keydown(function (e){
+            if(e.keyCode == 32){
+                pauseResumeClock();
             }
         });
     });
