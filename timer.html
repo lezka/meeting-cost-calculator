@@ -224,7 +224,7 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <script>
     var interval = null;
-    var clockStatus = 1;
+    var isClockTicking = 0;
     var attendees = null;
     var rate = null;
     var clockTime = 0;
@@ -238,11 +238,11 @@
         attendees = $("#attendees").val();
         rate      = $("#rate").val();
 
-        refreshPax();
-        start(rate);
+        refreshPax();        
+        start();
     }
 
-    function start(rate) {
+    function start() {
         if (interval) {
             clearInterval(interval);
         }
@@ -252,21 +252,25 @@
             $("#time").html(formatTime(clockTime));
             total += attendees * rate / 3600;
             $("#cost").html(formatCost(total));
-            //$("#cost").html(formatCost(clockTime * attendees * rate / 3600));
             window.history.replaceState({}, 'Timer', "#" + rate + "-" + attendees + "-" + clockTime);
         }, 1000);
+
+        isClockTicking = 1;
+        refreshPauseResumeButton();
     }
 
     function pause(){
         if (interval) {
             clearInterval(interval);
         }
+        isClockTicking = 0;
+        refreshPauseResumeButton();
     }
 
     function startOver() {
         pause();
         clockTime = 0;
-        total = 0;
+        total = 0;        
 
         $("#timer").fadeOut('slow', function() {
             $("#form").show();
@@ -304,32 +308,26 @@
 
     function pauseResumeClock() {
 
-        if (clockStatus == 1)
-        {
-            clockStatus = 0;
-            $("#clock-button").html("resume");
-            pause();
-            
-        }
-        else
-        {
-            clockStatus = 1;
-            $("#clock-button").html("pause");
-            start(rate);           
-        }    
+        isClockTicking ? pause() : start();                
+    }
+
+    function refreshPauseResumeButton()
+    {
+        isClockTicking ? $("#clock-button").html("pause") : $("#clock-button").html("resume");
     }
     
     function increasePax() {
         attendees++;
         refreshPax();
-        start(rate);  
+        if (isClockTicking)
+            start();  
     }
 
     function decreasePax() {
         attendees--;
         refreshPax();
-        start(rate); 
-
+        if (isClockTicking)
+            start(); 
     }
 
     function refreshPax() {
